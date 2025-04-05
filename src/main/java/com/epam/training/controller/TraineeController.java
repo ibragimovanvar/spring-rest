@@ -29,7 +29,7 @@ public class TraineeController {
     }
 
     @GetMapping("/by-username")
-    public ResponseEntity<ApiResponse<TraineeDTO>> getTraineeByUsername(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password,@RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<TraineeDTO>> getTraineeByUsername(@RequestHeader(value = "username") String headerUsername, @RequestHeader(value = "password") String password, @RequestParam String username) {
         traineeService.checkAuthProfile(headerUsername, password, username);
 
         ApiResponse<TraineeDTO> response = traineeService.getProfile(username);
@@ -37,7 +37,7 @@ public class TraineeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TraineeDTO>> updateTrainee(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password,@Valid @RequestBody TraineeDTO traineeDTO, @PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TraineeDTO>> updateTrainee(@RequestHeader(value = "username") String headerUsername, @RequestHeader(value = "password") String password, @Valid @RequestBody TraineeDTO traineeDTO, @PathVariable Long id) {
         traineeService.checkAuthProfile(headerUsername, password, id);
 
         ApiResponse<TraineeDTO> response = traineeService.updateProfile(traineeDTO, id);
@@ -45,7 +45,7 @@ public class TraineeController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteTrainee(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<Void>> deleteTrainee(@RequestHeader(value = "username") String headerUsername, @RequestHeader(value = "password") String password, @RequestParam String username) {
         traineeService.checkAuthProfile(headerUsername, password, username);
 
         ApiResponse<Void> response = traineeService.deleteTraineeProfile(username);
@@ -53,7 +53,7 @@ public class TraineeController {
     }
 
     @PatchMapping
-    public ResponseEntity<ApiResponse<Void>> activateOrDeactivate(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @Valid @RequestBody ActivateDeactiveRequest request) {
+    public ResponseEntity<ApiResponse<Void>> activateOrDeactivate(@RequestHeader(value = "username") String headerUsername, @RequestHeader(value = "password") String password, @Valid @RequestBody ActivateDeactiveRequest request) {
         traineeService.checkAuthProfile(headerUsername, password, request.getUsername());
 
         ApiResponse<Void> response = traineeService.activateOrDeactivate(request);
@@ -61,7 +61,7 @@ public class TraineeController {
     }
 
     @GetMapping("/not-assigned")
-    public ResponseEntity<ApiResponse<List<TrainerDTO>>> getNotAssignedActiveTrainers(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<List<TrainerDTO>>> getNotAssignedActiveTrainers(@RequestHeader(value = "username") String headerUsername, @RequestHeader(value = "password") String password, @RequestParam String username) {
         traineeService.checkAuthProfile(headerUsername, password, username);
 
         ApiResponse<List<TrainerDTO>> response = traineeService.getNotAssignedActiveTrainers(username);
