@@ -1,5 +1,6 @@
 package com.epam.training.repository;
 
+import com.epam.training.domain.Trainee;
 import com.epam.training.domain.Trainer;
 import com.epam.training.domain.Training;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,7 @@ public interface TrainerDao {
     Optional<Trainer> findById(Long id);
 
     Optional<Trainer> findByUsername(String username);
+    List<Trainee> findAllTrainerTrainees(Long id);
 
     Trainer update(Trainer trainer);
 

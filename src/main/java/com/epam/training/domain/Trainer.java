@@ -2,7 +2,6 @@ package com.epam.training.domain;
 
 import javax.persistence.*;
 
-import com.epam.training.domain.enumeration.DomainStatus;
 import lombok.*;
 
 import java.util.List;

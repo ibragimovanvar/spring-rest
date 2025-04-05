@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/training")
+@RequestMapping("/api/v1/trainings")
 @RequiredArgsConstructor
 public class TrainingController {
 

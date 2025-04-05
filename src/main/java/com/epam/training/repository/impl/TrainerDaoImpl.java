@@ -5,9 +5,11 @@ import com.epam.training.domain.Trainee;
 import com.epam.training.domain.Trainer;
 import com.epam.training.domain.Training;
 import com.epam.training.domain.User;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,14 @@ public class TrainerDaoImpl implements TrainerDao {
                 .setParameter("username", username)
                 .getResultStream()
                 .findFirst();
+    }
+
+    @Override
+    public List<Trainee> findAllTrainerTrainees(Long id) {
+        return entityManager.createQuery(
+                        "SELECT DISTINCT tr.trainee FROM Training tr WHERE tr.trainer.id = :id", Trainee.class)
+                .setParameter("id", id)
+                .getResultList();
     }
 
     @Override

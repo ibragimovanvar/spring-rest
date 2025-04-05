@@ -24,6 +24,7 @@ public interface TraineeDao {
     void deleteByUsername(String username);
 
     List<Trainee> findAll();
+    List<Trainer> findAllTraineeTrainers(Long id);
 
     boolean existsByUsername(String username);
 

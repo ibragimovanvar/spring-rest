@@ -1,18 +1,16 @@
 package com.epam.training.service.impl;
 
-import com.epam.training.domain.enumeration.DomainStatus;
+import com.epam.training.domain.*;
+import com.epam.training.dto.TraineeDTO;
 import com.epam.training.dto.TrainerDTO;
 import com.epam.training.dto.request.ActivateDeactiveRequest;
 import com.epam.training.dto.request.AuthDTO;
 import com.epam.training.dto.request.TrainerCreateDTO;
 import com.epam.training.dto.response.ApiResponse;
 import com.epam.training.exception.DomainException;
+import com.epam.training.mapper.TraineeMapper;
 import com.epam.training.mapper.TrainerMapper;
 import com.epam.training.repository.TrainerDao;
-import com.epam.training.domain.Trainer;
-import com.epam.training.domain.Training;
-import com.epam.training.domain.TrainingType;
-import com.epam.training.domain.User;
 import com.epam.training.repository.UserDao;
 import com.epam.training.service.TrainerService;
 import com.epam.training.service.TrainingTypeService;
@@ -31,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service("trainerService")
 @RequiredArgsConstructor
@@ -42,6 +41,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final DomainUtils domainUtils;
     private final TrainingTypeService trainingTypeService;
     private final UserDao userDao;
+    private final TraineeMapper traineeMapper;
 
     @Transactional
     @Override
@@ -61,6 +61,28 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    public void checkAuthProfile(String headerUsername, String password, String username) {
+        Trainer trainer = getByUsername(username);
+
+        if(trainer.getUser().getUsername().equals(headerUsername) && trainer.getUser().getPassword().equals(password)) {
+            return;
+        }
+
+        throw new DomainException("Invalid username or password");
+    }
+
+    @Override
+    public void checkAuthProfile(String headerUsername, String password, Long id) {
+        Trainer trainer = trainerDao.findById(id).orElseThrow(() -> new DomainException("Trainee not found: " + id));
+
+        if(trainer.getUser().getUsername().equals(headerUsername) && trainer.getUser().getPassword().equals(password)) {
+            return;
+        }
+
+        throw new DomainException("Invalid username or password");
+    }
+
+    @Override
     public ApiResponse<TrainerDTO> getProfile(String username) {
         LOGGER.info("Request to get {} profile with username: {}", ENTITY_NAME, username);
 
@@ -68,6 +90,8 @@ public class TrainerServiceImpl implements TrainerService {
                 .orElseThrow(() -> new DomainException("Trainer not found: " + username));
 
         TrainerDTO dto = trainerMapper.toDto(trainer);
+
+        dto.setTraineeList(getTraineesTrainer(trainer.getId()));
 
         return new ApiResponse<>(true, null, dto);
     }
@@ -92,12 +116,13 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = optionalTrainer.get();
         trainer.getUser().setFirstName(dto.getFirstName());
         trainer.getUser().setLastName(dto.getLastName());
-        trainer.getUser().setUsername(checkUsernameNotExists(dto.getUsername()));
         trainer.getUser().setActive(dto.getActive());
         trainer.setSpecialization(trainingTypeService.getTrainingType(dto.getTrainingTypeId()));
 
         Trainer update = trainerDao.update(trainer);
+
         TrainerDTO responseDto = trainerMapper.toDto(update);
+        responseDto.setTraineeList(getTraineesTrainer(update.getId()));
 
         return new ApiResponse<>(true, null, responseDto);
     }
@@ -157,6 +182,13 @@ public class TrainerServiceImpl implements TrainerService {
         if (!trainerDao.findByUsername(username).isPresent()) {
             throw new SecurityException("Authentication required");
         }
+    }
+
+    private List<TraineeDTO> getTraineesTrainer(Long trainerId) {
+        return trainerDao.findAllTrainerTrainees(trainerId)
+                .stream()
+                .map(traineeMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     private synchronized String generateUsername(String firstName, String lastName) {

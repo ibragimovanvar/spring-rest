@@ -8,16 +8,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final UserDao userDao;
 
+    @Operation(summary = "Login endpoint", description = "Returns a login token")
     @GetMapping("/login")
     public ResponseEntity<ApiResponse<Void>> login(@Valid @RequestBody AuthDTO authDTO) {
         ApiResponse<Void> apiResponse = new ApiResponse<>();

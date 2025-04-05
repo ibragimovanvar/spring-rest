@@ -14,6 +14,8 @@ import java.util.List;
 @Service("traineeService")
 public interface TraineeService {
     ApiResponse<TraineeDTO> getProfile(String username);
+    void checkAuthProfile(String headerUsername, String password, String username);
+    void checkAuthProfile(String headerUsername, String password, Long id);
     Trainee getByUsername(String username);
     ApiResponse<TraineeDTO> updateProfile(TraineeDTO trainee, Long id);
     ApiResponse<AuthDTO> createProfile(TraineeCreateDTO dto);

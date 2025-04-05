@@ -79,6 +79,14 @@ public class TraineeDaoImpl implements TraineeDao {
     }
 
     @Override
+    public List<Trainer> findAllTraineeTrainers(Long traineeId) {
+        return entityManager.createQuery(
+                        "SELECT DISTINCT tr.trainer FROM Training tr WHERE tr.trainee.id = :id", Trainer.class)
+                .setParameter("id", traineeId)
+                .getResultList();
+    }
+
+    @Override
     public boolean existsByUsername(String username) {
         return entityManager.createQuery("SELECT COUNT(t) FROM Trainee t WHERE t.user.username = :username", Long.class)
                 .setParameter("username", username)
@@ -127,8 +135,9 @@ public class TraineeDaoImpl implements TraineeDao {
     @Override
     public List<Trainer> findAvailableTrainersForTrainee(String traineeUsername) {
         return entityManager.createQuery(
-                        "SELECT tr FROM Trainer tr WHERE tr NOT IN " +
-                                "(SELECT t.trainers FROM Trainee t WHERE t.user.username = :username)",
+                        "SELECT tr FROM Trainer tr WHERE tr NOT IN (" +
+                                "SELECT t.trainer FROM Training t WHERE t.trainee.user.username = :username" +
+                                ")",
                         Trainer.class)
                 .setParameter("username", traineeUsername)
                 .getResultList();

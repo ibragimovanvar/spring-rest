@@ -62,15 +62,31 @@ public class TraineeServiceImpl implements TraineeService {
                 .orElseThrow(() -> new DomainException("Trainee not found: " + username));
 
         TraineeDTO dto = traineeMapper.toDto(trainee);
-
-        /*List<GetTraineeTrainerDTO> trainersDto = trainee.getTrainers()
-                .stream()
-                .map(trainerMapper::toGetTraineeTrainerDto)
-                .collect(Collectors.toList());
-
-        dto.setTrainerList(trainersDto);*/
+        dto.setTrainerList(getTraineeTrainerDTOS(trainee.getId()));
 
         return new ApiResponse<>(true, null, dto);
+    }
+
+    @Override
+    public void checkAuthProfile(String headerUsername, String password, String username) {
+        Trainee trainee = getByUsername(username);
+
+        if(trainee.getUser().getUsername().equals(headerUsername) && trainee.getUser().getPassword().equals(password)) {
+            return;
+        }
+
+        throw new DomainException("Invalid username or password");
+    }
+
+    @Override
+    public void checkAuthProfile(String headerUsername, String password, Long id) {
+        Trainee trainee = traineeDao.findById(id).orElseThrow(() -> new DomainException("Trainee not found: " + id));
+
+        if(trainee.getUser().getUsername().equals(headerUsername) && trainee.getUser().getPassword().equals(password)) {
+            return;
+        }
+
+        throw new DomainException("Invalid username or password");
     }
 
     @Override
@@ -97,6 +113,8 @@ public class TraineeServiceImpl implements TraineeService {
         traineeDao.update(entity);
 
         TraineeDTO resultDto = traineeMapper.toDto(entity);
+        resultDto.setTrainerList(getTraineeTrainerDTOS(entity.getId()));
+
         return new ApiResponse<>(true, null, resultDto);
     }
 
@@ -104,7 +122,7 @@ public class TraineeServiceImpl implements TraineeService {
     public ApiResponse<Void> deleteTraineeProfile(String username) {
         LOGGER.info("Request to delete {} profile with username: {}", ENTITY_NAME, username);
 
-        if(!traineeDao.existsByUsername(username)){
+        if (!traineeDao.existsByUsername(username)) {
             throw new DomainException("Trainee not found: " + username);
         }
 
@@ -118,7 +136,7 @@ public class TraineeServiceImpl implements TraineeService {
         LOGGER.info("Request to set {} active status to {} for username: {}",
                 ENTITY_NAME, request.getActive(), request.getUsername());
 
-        if(!traineeDao.existsByUsername(request.getUsername())){
+        if (!traineeDao.existsByUsername(request.getUsername())) {
             throw new DomainException("Trainee not found: " + request.getUsername());
         }
 
@@ -168,6 +186,13 @@ public class TraineeServiceImpl implements TraineeService {
     public void updateTraineeTrainers(String traineeUsername, List<String> trainerUsernames) {
         LOGGER.info("Request to update trainers for {} with username: {}", ENTITY_NAME, traineeUsername);
         traineeDao.updateTraineeTrainers(traineeUsername, trainerUsernames);
+    }
+
+    private List<GetTraineeTrainerDTO> getTraineeTrainerDTOS(Long traineeId) {
+        return traineeDao.findAllTraineeTrainers(traineeId)
+                .stream()
+                .map(trainerMapper::toGetTraineeTrainerDto)
+                .collect(Collectors.toList());
     }
 
     private synchronized String generateUsername(String firstName, String lastName) {

@@ -29,31 +29,41 @@ public class TraineeController {
     }
 
     @GetMapping("/by-username")
-    public ResponseEntity<ApiResponse<TraineeDTO>> getTraineeByUsername(@RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<TraineeDTO>> getTraineeByUsername(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password,@RequestParam(required = true) String username) {
+        traineeService.checkAuthProfile(headerUsername, password, username);
+
         ApiResponse<TraineeDTO> response = traineeService.getProfile(username);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TraineeDTO>> updateTrainee(@Valid @RequestBody TraineeDTO traineeDTO, @PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TraineeDTO>> updateTrainee(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password,@Valid @RequestBody TraineeDTO traineeDTO, @PathVariable Long id) {
+        traineeService.checkAuthProfile(headerUsername, password, id);
+
         ApiResponse<TraineeDTO> response = traineeService.updateProfile(traineeDTO, id);
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteTrainee(@RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<Void>> deleteTrainee(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @RequestParam(required = true) String username) {
+        traineeService.checkAuthProfile(headerUsername, password, username);
+
         ApiResponse<Void> response = traineeService.deleteTraineeProfile(username);
         return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping
-    public ResponseEntity<ApiResponse<Void>> activateOrDeactivate(@Valid @RequestBody ActivateDeactiveRequest request) {
+    public ResponseEntity<ApiResponse<Void>> activateOrDeactivate(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @Valid @RequestBody ActivateDeactiveRequest request) {
+        traineeService.checkAuthProfile(headerUsername, password, request.getUsername());
+
         ApiResponse<Void> response = traineeService.activateOrDeactivate(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/not-assigned")
-    public ResponseEntity<ApiResponse<List<TrainerDTO>>> getNotAssignedActiveTrainers(@RequestParam(required = true) String username) {
+    public ResponseEntity<ApiResponse<List<TrainerDTO>>> getNotAssignedActiveTrainers(@RequestHeader(value = "username", required = true) String headerUsername, @RequestHeader(value = "password", required = true) String password, @RequestParam(required = true) String username) {
+        traineeService.checkAuthProfile(headerUsername, password, username);
+
         ApiResponse<List<TrainerDTO>> response = traineeService.getNotAssignedActiveTrainers(username);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
